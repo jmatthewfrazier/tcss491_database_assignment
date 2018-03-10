@@ -220,41 +220,29 @@ socket.on("load", function (data) {
 socket.emit("save", { studentname: "Matt Frazier", statename: "aBudgieFlock", data: "budgies" });
 socket.emit("load", { studentname: "Matt Frazier", statename: "aBudgieFlock" });
 
+function save() {
+    var cache = [];
+    var text = JSON.stringify(gameEngine.entities, function(key, value) {
+        if (typeof value === 'object' && value !== null) {
+            if (cache.indexOf(value) !== -1) {
+                return;
+            }
+            cache.push(value);
+        }
+        return value;
+    });
+    cache = null;
+    console.log("Budgies away!");
+    socket.emit("save", { studentname: "Matt Frazier", statename: "aBudgieFlock", data: text });
+}
+
+function load() {
+    console.log("Budgies inbound!");
+    socket.emit("load", { studentname: "Matt Frazier", statename: "aBudgieFlock" });
+}
 
 window.onload = function () {
-    var field = document.getElementById("field");
-
-    socket.on("ping", function (ping) {
-        console.log(ping);
-        socket.emit("pong");
-    });
-
-    field.onkeydown = function (e) {
-        if (e.keyCode === 83 || e.keyCode === 76) {
-            if (e.keyCode === 83) {
-				var cache = [];
-	            var text = JSON.stringify(gameEngine.entities, function(key, value) {
-			      	if (typeof value === 'object' && value !== null) {
-			          	if (cache.indexOf(value) !== -1) {
-			            	return;
-			          	}
-			          	cache.push(value);
-			      	}
-			      	return value;
-				});
-	            console.log("Budgies away!");
-	            cache = null;
-	            socket.emit("save", { studentname: "Matt Frazier", statename: "aBudgieFlock", data: text });
-	            field.value = "";
-            } else if (e.keyCode === 76) {
-            	console.log("Budgies inbound!");
-	            socket.emit("load", { studentname: "Matt Frazier", statename: "aBudgieFlock" });
-	            field.value = "";
-            }
-            
-        }
-    };
-
+    
     socket.on("connect", function () {
         console.log("Socket connected.")
     });
